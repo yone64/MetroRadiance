@@ -12,6 +12,7 @@ using System.Windows.Shell;
 using MetroRadiance.Chrome.Behaviors;
 using MetroRadiance.Core;
 using MetroRadiance.Core.Win32;
+using Microsoft.Windows.Shell;
 
 namespace MetroRadiance.Controls
 {

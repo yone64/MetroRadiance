@@ -53,7 +53,7 @@ namespace MetroRadiance
 				if (this._Theme != value)
 				{
 					this._Theme = value;
-					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(() => Theme);
 				}
 			}
 		}
@@ -72,7 +72,7 @@ namespace MetroRadiance
 				if (this._Accent != value)
 				{
 					this._Accent = value;
-					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(() => Accent);
 				}
 			}
 		}
@@ -137,7 +137,7 @@ namespace MetroRadiance
 		{
 			if (this.initialized && this.Theme != theme)
 			{
-				this.dispatcher.Invoke(() =>
+				this.dispatcher.Invoke(new Action(() =>
 				{
 					var uri = CreateThemeResourceUri(theme);
 					var dic = new ResourceDictionary { Source = uri };
@@ -145,7 +145,7 @@ namespace MetroRadiance
 					dic.Keys.OfType<string>()
 						.Where(key => this.appTheme.Contains(key))
 						.ForEach(key => this.appTheme[key] = dic[key]);
-				});
+				}));
 
 				this.Theme = theme;
 			}
@@ -156,18 +156,18 @@ namespace MetroRadiance
 			var uri = CreateAccentResourceUri(accent);
 			if (uri != null)
 			{
-				this.dispatcher.Invoke(() =>
+				this.dispatcher.Invoke(new Action(() =>
 				{
 					var resource = new ResourceDictionary { Source = uri };
 					this.ChangeAccentCore(resource);
-				});
+				}));
 				this.Accent = accent;
 			}
 		}
 
 		public void ChangeAccent(ResourceDictionary resource)
 		{
-			this.dispatcher.Invoke(() => this.ChangeAccentCore(resource));
+			this.dispatcher.Invoke(new Action(() => this.ChangeAccentCore(resource)));
 			this.Accent = Accent.Original;
 		}
 
