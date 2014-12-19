@@ -128,18 +128,56 @@ namespace MetroRadiance.Chrome.Internal
 			var bindingChromeMode = new Binding("Mode") { Source = behavior, };
 			this.SetBinding(ChromeModeProperty, bindingChromeMode);
 
+		    this.Loaded += (sender, args) =>
+		    {
+                // this.owner.Owner.OwnedWindowsをアプリケーションで使う場合は要注意
+		        if (this.owner.Owner != null)
+		        {
+		            this.Owner = this.owner.Owner;
+		        }
+		    };
 			this.owner.ContentRendered += (sender, args) => this.Update();
 			this.owner.StateChanged += (sender, args) =>
 			{
 				this.Update();
 				this.ownerState = this.owner.WindowState;
 			};
-			this.owner.LocationChanged += (sender, args) => this.Update();
-			this.owner.SizeChanged += (sender, args) => this.Update();
+            this.owner.SourceInitialized += (sender, args) => this.AddOwnerHandler(owner);
 			this.owner.Activated += (sender, args) => this.Update();
 			this.owner.Deactivated += (sender, args) => this.Update();
-			this.owner.Closed += (sender, args) => this.Close();
+			this.owner.Closed += (sender, args) =>
+			{
+                RemoveOwnerHandler(owner);
+                this.Close();
+			};
 		}
+
+        private void AddOwnerHandler(Window w)
+        {
+            var source = PresentationSource.FromVisual(w) as HwndSource;
+            if (source != null)
+            {
+                source.AddHook(this.OwnerWndProc);
+            }
+        }
+
+        private void RemoveOwnerHandler(Window w)
+        {
+            var source = PresentationSource.FromVisual(w) as HwndSource;
+            if (source != null)
+            {
+                source.RemoveHook(this.OwnerWndProc);
+            }
+        }
+
+        private IntPtr OwnerWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == (int)WM.WINDOWPOSCHANGED)
+            {
+                this.Update();
+            }
+            return IntPtr.Zero;
+        }
 
 		protected override void OnSourceInitialized(EventArgs e)
 		{
@@ -185,8 +223,8 @@ namespace MetroRadiance.Chrome.Internal
 				}
 
 				this.Visibility = Visibility.Visible;
-				this.UpdateCore();
-			}
+                this.Dispatcher.BeginInvoke(new Action(this.UpdateCore));
+            }
 			else
 			{
 				this.Visibility = Visibility.Collapsed;
