@@ -128,11 +128,7 @@ namespace MetroRadiance.Chrome.Internal
 			var bindingChromeMode = new Binding("Mode") { Source = behavior, };
 			this.SetBinding(ChromeModeProperty, bindingChromeMode);
 
-			this.owner.ContentRendered += (sender, args) =>
-			{
-				this.Show();
-				this.Update();
-			};
+			this.owner.ContentRendered += (sender, args) => this.Update();
 			this.owner.StateChanged += (sender, args) =>
 			{
 				this.Update();
